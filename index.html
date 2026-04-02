@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mini Chai</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: #111;
+      color: white;
+      max-width: 400px;
+      margin: auto;
+    }
+    #chat {
+      height: 300px;
+      overflow-y: auto;
+      border: 1px solid #444;
+      padding: 10px;
+      margin: 10px 0;
+    }
+    input { width: 70%; padding: 10px; }
+    button { padding: 10px; }
+  </style>
+</head>
+<body>
+
+<h2>Mini Chai 🤖</h2>
+
+<select id="character">
+  <option value="friend">Best Friend</option>
+  <option value="mentor">Mentor</option>
+  <option value="villain">Villain</option>
+</select>
+
+<div id="chat"></div>
+
+<input id="input" placeholder="Type a message..." />
+<button onclick="sendMessage()">Send</button>
+
+<script>
+async function sendMessage() {
+  const input = document.getElementById("input");
+  const chat = document.getElementById("chat");
+  const character = document.getElementById("character").value;
+
+  const msg = input.value;
+  chat.innerHTML += "<p><b>You:</b> " + msg + "</p>";
+
+  const res = await fetch("https://mini-chai-backend.onrender.com/chat", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ message: msg, character })
+  });
+
+  const data = await res.json();
+  chat.innerHTML += "<p><b>AI:</b> " + data.reply + "</p>";
+
+  input.value = "";
+}
+</script>
+
+</body>
+</html>
