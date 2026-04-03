@@ -4,7 +4,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="manifest" href="manifest.json">
-<link rel="icon" href="icon.jpg">
+<link rel="icon" type="image/jpeg" href="icon.jpg">
 <link rel="apple-touch-icon" href="icon.jpg">
 
 <title>Mini Chai</title>
@@ -81,7 +81,7 @@ button {
 }
 
 select {
-  margin: 5px;
+  margin-top: 5px;
   padding: 5px;
   border-radius: 10px;
 }
@@ -129,6 +129,15 @@ async function sendMessage() {
   addMessage(msg, "user");
   input.value = "";
 
+  const chat = document.getElementById("chat");
+
+  // Typing animation
+  const typing = document.createElement("div");
+  typing.classList.add("bubble", "ai");
+  typing.innerText = "Typing...";
+  chat.appendChild(typing);
+  chat.scrollTop = chat.scrollHeight;
+
   const res = await fetch("https://mini-chai-backend.onrender.com/chat", {
     method: "POST",
     headers: {"Content-Type": "application/json"},
@@ -136,6 +145,9 @@ async function sendMessage() {
   });
 
   const data = await res.json();
+
+  chat.removeChild(typing);
+
   addMessage(data.reply, "ai");
 }
 </script>
