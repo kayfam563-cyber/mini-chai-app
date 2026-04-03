@@ -1,9 +1,14 @@
 <!DOCTYPE html>
 <html>
-<head<link rel="manifest" href="manifest.json">
-<link rel="icon" href="icon.jpg">
-<link rel="apple-touch-icon" href="icon.jpg">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/jpeg" href="icon.jpg">
+  <link rel="apple-touch-icon" href="icon.jpg">
+
   <title>Mini Chai</title>
+
   <style>
     body {
       font-family: Arial;
@@ -12,17 +17,47 @@
       max-width: 400px;
       margin: auto;
     }
+
+    h2 {
+      text-align: center;
+    }
+
     #chat {
       height: 300px;
       overflow-y: auto;
       border: 1px solid #444;
       padding: 10px;
       margin: 10px 0;
+      border-radius: 10px;
     }
-    input { width: 70%; padding: 10px; }
-    button { padding: 10px; }
+
+    .user {
+      text-align: right;
+      margin: 5px;
+    }
+
+    .ai {
+      text-align: left;
+      margin: 5px;
+    }
+
+    input {
+      width: 70%;
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+    }
+
+    button {
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+      background: #444;
+      color: white;
+    }
   </style>
 </head>
+
 <body>
 
 <h2>Mini Chai 🤖</h2>
@@ -45,7 +80,9 @@ async function sendMessage() {
   const character = document.getElementById("character").value;
 
   const msg = input.value;
-  chat.innerHTML += "<p><b>You:</b> " + msg + "</p>";
+  if (!msg) return;
+
+  chat.innerHTML += `<p class="user"><b>You:</b> ${msg}</p>`;
 
   const res = await fetch("https://mini-chai-backend.onrender.com/chat", {
     method: "POST",
@@ -54,9 +91,11 @@ async function sendMessage() {
   });
 
   const data = await res.json();
-  chat.innerHTML += "<p><b>AI:</b> " + data.reply + "</p>";
+
+  chat.innerHTML += `<p class="ai"><b>AI:</b> ${data.reply}</p>`;
 
   input.value = "";
+  chat.scrollTop = chat.scrollHeight;
 }
 </script>
 
