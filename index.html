@@ -1,97 +1,94 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mini Chai</title>
 
-<link rel="manifest" href="manifest.json">
-<link rel="icon" type="image/jpeg" href="icon.jpg">
-<link rel="apple-touch-icon" href="icon.jpg">
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial;
+      background: #0f0f0f;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
 
-<title>Mini Chai</title>
+    header {
+      padding: 15px;
+      text-align: center;
+      background: #1a1a1a;
+      font-size: 20px;
+      font-weight: bold;
+    }
 
-<style>
-body {
-  margin: 0;
-  font-family: Arial;
-  background: #0f0f0f;
-  color: white;
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-}
+    select {
+      margin-top: 8px;
+      padding: 5px;
+      border-radius: 8px;
+    }
 
-header {
-  padding: 15px;
-  text-align: center;
-  background: #1a1a1a;
-  font-size: 18px;
-  font-weight: bold;
-}
+    #chat {
+      flex: 1;
+      padding: 10px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
 
-#chat {
-  flex: 1;
-  overflow-y: auto;
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-}
+    .bubble {
+      max-width: 70%;
+      padding: 10px;
+      border-radius: 15px;
+      line-height: 1.4;
+    }
 
-.bubble {
-  max-width: 70%;
-  padding: 10px 14px;
-  margin: 6px 0;
-  border-radius: 20px;
-  line-height: 1.4;
-}
+    .user {
+      align-self: flex-end;
+      background: #4CAF50;
+    }
 
-.user {
-  align-self: flex-end;
-  background: #4caf50;
-  color: white;
-  border-bottom-right-radius: 5px;
-}
+    .ai {
+      align-self: flex-start;
+      background: #2a2a2a;
+    }
 
-.ai {
-  align-self: flex-start;
-  background: #2a2a2a;
-  border-bottom-left-radius: 5px;
-}
+    .typing {
+      font-style: italic;
+      opacity: 0.7;
+    }
 
-#inputArea {
-  display: flex;
-  padding: 10px;
-  background: #1a1a1a;
-}
+    #inputArea {
+      display: flex;
+      padding: 10px;
+      background: #1a1a1a;
+    }
 
-input {
-  flex: 1;
-  padding: 10px;
-  border-radius: 20px;
-  border: none;
-  outline: none;
-}
+    input {
+      flex: 1;
+      padding: 10px;
+      border-radius: 20px;
+      border: none;
+      outline: none;
+    }
 
-button {
-  margin-left: 10px;
-  padding: 10px 15px;
-  border-radius: 20px;
-  border: none;
-  background: #4caf50;
-  color: white;
-}
-
-select {
-  margin-top: 5px;
-  padding: 5px;
-  border-radius: 10px;
-}
-</style>
+    button {
+      margin-left: 10px;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 20px;
+      background: #4CAF50;
+      color: white;
+      cursor: pointer;
+    }
+  </style>
 </head>
 
 <body>
 
 <header>
-  Mini Chai 🤖
+  Mini Chai
   <br>
   <select id="character">
     <option value="friend">Best Friend</option>
@@ -108,47 +105,55 @@ select {
 </div>
 
 <script>
-function addMessage(text, type) {
-  const chat = document.getElementById("chat");
-  const bubble = document.createElement("div");
-
-  bubble.classList.add("bubble", type);
-  bubble.innerText = text;
-
-  chat.appendChild(bubble);
-  chat.scrollTop = chat.scrollHeight;
-}
-
 async function sendMessage() {
   const input = document.getElementById("input");
+  const chat = document.getElementById("chat");
   const character = document.getElementById("character").value;
 
   const msg = input.value;
   if (!msg) return;
 
-  addMessage(msg, "user");
+  // user bubble
+  const userBubble = document.createElement("div");
+  userBubble.className = "bubble user";
+  userBubble.textContent = msg;
+  chat.appendChild(userBubble);
+
   input.value = "";
 
-  const chat = document.getElementById("chat");
+  // typing bubble
+  const typingBubble = document.createElement("div");
+  typingBubble.className = "bubble ai typing";
+  typingBubble.textContent = "Typing...";
+  chat.appendChild(typingBubble);
 
-  // Typing animation
-  const typing = document.createElement("div");
-  typing.classList.add("bubble", "ai");
-  typing.innerText = "Typing...";
-  chat.appendChild(typing);
   chat.scrollTop = chat.scrollHeight;
 
-  const res = await fetch("https://mini-chai-backend.onrender.com/chat", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({ message: msg, character })
-  });
+  try {
+    const res = await fetch("https://mini-chai-backend.onrender.com/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ message: msg, character })
+    });
 
-  const data = await res.json();
+    const data = await res.json();
 
-  chat.removeChild(typing);
+    // remove typing
+    chat.removeChild(typingBubble);
 
-  addMessage(data.reply, "ai");
+    // AI bubble
+    const aiBubble = document.createElement("div");
+    aiBubble.className = "bubble ai";
+    aiBubble.textContent = data.reply;
+    chat.appendChild(aiBubble);
+
+    chat.scrollTop = chat.scrollHeight;
+
+  } catch (err) {
+    typingBubble.textContent = "Error talking to server";
+  }
 }
 </script>
 
