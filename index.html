@@ -3,7 +3,14 @@
 <head>
   <title>Mini Chai</title>
 
+  <!-- THIS LINE IS CRITICAL FOR PHONES -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       font-family: Arial;
@@ -12,19 +19,19 @@
       overflow: hidden;
     }
 
-    .container {
+    /* container holds all pages */
+    #container {
       display: flex;
       height: 100vh;
-      width: 100vw;
+      width: 400vw; /* 4 pages */
       transition: transform 0.3s ease;
     }
 
+    /* each page */
     .page {
-      min-width: 100vw;
+      width: 100vw;
       height: 100vh;
-      flex-shrink: 0;
-      padding: 60px 10px 70px;
-      box-sizing: border-box;
+      padding: 60px 10px 80px;
       overflow-y: auto;
     }
 
@@ -33,9 +40,9 @@
     }
 
     .item {
+      background: #2a2a2a;
       padding: 12px;
       margin: 8px 0;
-      background: #2a2a2a;
       border-radius: 12px;
       cursor: pointer;
     }
@@ -49,7 +56,7 @@
     .bubble {
       padding: 10px;
       border-radius: 15px;
-      max-width: 70%;
+      max-width: 75%;
     }
 
     .user {
@@ -62,6 +69,7 @@
       align-self: flex-start;
     }
 
+    /* top nav */
     #nav {
       position: fixed;
       top: 0;
@@ -73,6 +81,7 @@
       z-index: 1000;
     }
 
+    /* bottom input */
     #inputArea {
       position: fixed;
       bottom: 0;
@@ -102,6 +111,7 @@
 
 <body>
 
+<!-- NAV -->
 <div id="nav">
   <div onclick="goToPage(0)">Characters</div>
   <div onclick="goToPage(1)">Search</div>
@@ -109,8 +119,10 @@
   <div onclick="goToPage(3)">Profile</div>
 </div>
 
-<div id="container" class="container">
+<!-- PAGES -->
+<div id="container">
 
+  <!-- Characters -->
   <div class="page">
     <h2>Characters</h2>
     <div class="item" onclick="setCharacter('friend')">Best Friend</div>
@@ -118,6 +130,7 @@
     <div class="item" onclick="setCharacter('villain')">Villain</div>
   </div>
 
+  <!-- Search -->
   <div class="page">
     <h2>Search</h2>
     <input id="search" placeholder="Search..." oninput="filterCharacters()" />
@@ -128,11 +141,13 @@
     </div>
   </div>
 
+  <!-- Chat -->
   <div class="page">
     <h2>Chat</h2>
     <div id="chat" class="chat"></div>
   </div>
 
+  <!-- Profile -->
   <div class="page">
     <h2>Profile</h2>
     <div class="item">Account</div>
@@ -140,8 +155,9 @@
 
 </div>
 
+<!-- INPUT -->
 <div id="inputArea">
-  <input id="input" placeholder="Type..." />
+  <input id="input" placeholder="Type a message..." />
   <button onclick="sendMessage()">Send</button>
 </div>
 
@@ -149,13 +165,14 @@
 let currentPage = 0;
 let currentCharacter = "friend";
 
+/* NAV CLICK */
 function goToPage(i) {
   currentPage = i;
   document.getElementById("container").style.transform =
-    `translateX(-${i * 100}vw)`;
+    "translateX(-" + (i * 100) + "vw)";
 }
 
-// swipe
+/* SWIPE */
 let startX = 0;
 
 document.addEventListener("touchstart", e => {
@@ -165,15 +182,22 @@ document.addEventListener("touchstart", e => {
 document.addEventListener("touchend", e => {
   let endX = e.changedTouches[0].clientX;
 
-  if (startX - endX > 50 && currentPage < 3) goToPage(currentPage + 1);
-  if (endX - startX > 50 && currentPage > 0) goToPage(currentPage - 1);
+  if (startX - endX > 50 && currentPage < 3) {
+    goToPage(currentPage + 1);
+  }
+
+  if (endX - startX > 50 && currentPage > 0) {
+    goToPage(currentPage - 1);
+  }
 });
 
+/* CHARACTER */
 function setCharacter(char) {
   currentCharacter = char;
   goToPage(2);
 }
 
+/* SEARCH */
 function filterCharacters() {
   const search = document.getElementById("search").value.toLowerCase();
   const items = document.querySelectorAll("#characterList .item");
@@ -185,6 +209,7 @@ function filterCharacters() {
   });
 }
 
+/* CHAT */
 async function sendMessage() {
   const input = document.getElementById("input");
   const chat = document.getElementById("chat");
@@ -205,11 +230,11 @@ async function sendMessage() {
   });
 
   const data = await res.json();
-  document.getElementById(id).remove();
 
+  document.getElementById(id).remove();
   chat.innerHTML += `<div class="bubble ai">${data.reply}</div>`;
 }
 </script>
 
 </body>
-      </html>
+</html>
