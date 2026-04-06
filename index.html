@@ -14,16 +14,16 @@
 
     .container {
       display: flex;
-      width: 400%;
       height: 100vh;
+      width: 100vw;
       transition: transform 0.3s ease;
     }
 
     .page {
-      width: 100%;
+      min-width: 100vw;
       height: 100vh;
       flex-shrink: 0;
-      padding: 10px;
+      padding: 60px 10px 70px;
       box-sizing: border-box;
       overflow-y: auto;
     }
@@ -33,15 +33,11 @@
     }
 
     .item {
-      padding: 10px;
-      margin: 5px 0;
+      padding: 12px;
+      margin: 8px 0;
       background: #2a2a2a;
-      border-radius: 10px;
+      border-radius: 12px;
       cursor: pointer;
-    }
-
-    .item:hover {
-      background: #3a3a3a;
     }
 
     .chat {
@@ -66,7 +62,18 @@
       align-self: flex-start;
     }
 
-    .inputArea {
+    #nav {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+      background: #1a1a1a;
+      padding: 10px;
+      z-index: 1000;
+    }
+
+    #inputArea {
       position: fixed;
       bottom: 0;
       width: 100%;
@@ -90,40 +97,20 @@
       background: #4CAF50;
       color: white;
     }
-
-    #chatPage {
-      padding-bottom: 70px;
-    }
-
-    #nav {
-      position: fixed;
-      top: 0;
-      width: 100%;
-      display: flex;
-      justify-content: space-around;
-      background: #1a1a1a;
-      padding: 5px;
-    }
-
-    .navBtn {
-      cursor: pointer;
-    }
   </style>
 </head>
 
 <body>
 
-<!-- Navigation -->
 <div id="nav">
-  <div class="navBtn" onclick="goToPage(0)">Characters</div>
-  <div class="navBtn" onclick="goToPage(1)">Search</div>
-  <div class="navBtn" onclick="goToPage(2)">Chat</div>
-  <div class="navBtn" onclick="goToPage(3)">Profile</div>
+  <div onclick="goToPage(0)">Characters</div>
+  <div onclick="goToPage(1)">Search</div>
+  <div onclick="goToPage(2)">Chat</div>
+  <div onclick="goToPage(3)">Profile</div>
 </div>
 
-<div class="container" id="container">
+<div id="container" class="container">
 
-  <!-- Characters Page -->
   <div class="page">
     <h2>Characters</h2>
     <div class="item" onclick="setCharacter('friend')">Best Friend</div>
@@ -131,37 +118,30 @@
     <div class="item" onclick="setCharacter('villain')">Villain</div>
   </div>
 
-  <!-- Search Page -->
   <div class="page">
     <h2>Search</h2>
-    <input id="search" placeholder="Search characters..." oninput="filterCharacters()" />
-
+    <input id="search" placeholder="Search..." oninput="filterCharacters()" />
     <div id="characterList">
       <div class="item" onclick="setCharacter('friend')">Funny Friend</div>
       <div class="item" onclick="setCharacter('mentor')">Wise Mentor</div>
       <div class="item" onclick="setCharacter('villain')">Dark Villain</div>
-      <div class="item" onclick="setCharacter('friend')">Chill Bestie</div>
     </div>
   </div>
 
-  <!-- Chat Page -->
-  <div class="page" id="chatPage">
+  <div class="page">
     <h2>Chat</h2>
     <div id="chat" class="chat"></div>
   </div>
 
-  <!-- Profile Page -->
   <div class="page">
     <h2>Profile</h2>
     <div class="item">Account</div>
-    <div class="item">Settings</div>
   </div>
 
 </div>
 
-<!-- Input -->
-<div class="inputArea">
-  <input id="input" placeholder="Type a message..." />
+<div id="inputArea">
+  <input id="input" placeholder="Type..." />
   <button onclick="sendMessage()">Send</button>
 </div>
 
@@ -169,13 +149,13 @@
 let currentPage = 0;
 let currentCharacter = "friend";
 
-function goToPage(index) {
-  currentPage = index;
+function goToPage(i) {
+  currentPage = i;
   document.getElementById("container").style.transform =
-    `translateX(-${index * 100}%)`;
+    `translateX(-${i * 100}vw)`;
 }
 
-// swipe support
+// swipe
 let startX = 0;
 
 document.addEventListener("touchstart", e => {
@@ -185,16 +165,13 @@ document.addEventListener("touchstart", e => {
 document.addEventListener("touchend", e => {
   let endX = e.changedTouches[0].clientX;
 
-  if (startX - endX > 50 && currentPage < 3) {
-    goToPage(currentPage + 1);
-  } else if (endX - startX > 50 && currentPage > 0) {
-    goToPage(currentPage - 1);
-  }
+  if (startX - endX > 50 && currentPage < 3) goToPage(currentPage + 1);
+  if (endX - startX > 50 && currentPage > 0) goToPage(currentPage - 1);
 });
 
 function setCharacter(char) {
   currentCharacter = char;
-  goToPage(2); // jump to chat
+  goToPage(2);
 }
 
 function filterCharacters() {
@@ -218,32 +195,21 @@ async function sendMessage() {
   chat.innerHTML += `<div class="bubble user">${msg}</div>`;
   input.value = "";
 
-  const typingId = "typing-" + Date.now();
-  chat.innerHTML += `<div id="${typingId}" class="bubble ai">Typing...</div>`;
+  const id = "t" + Date.now();
+  chat.innerHTML += `<div id="${id}" class="bubble ai">Typing...</div>`;
 
-  try {
-    const res = await fetch("https://mini-chai-backend.onrender.com/chat", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        message: msg,
-        character: currentCharacter
-      })
-    });
+  const res = await fetch("https://mini-chai-backend.onrender.com/chat", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({message: msg, character: currentCharacter})
+  });
 
-    const data = await res.json();
+  const data = await res.json();
+  document.getElementById(id).remove();
 
-    document.getElementById(typingId).remove();
-    chat.innerHTML += `<div class="bubble ai">${data.reply}</div>`;
-
-  } catch {
-    document.getElementById(typingId).remove();
-    chat.innerHTML += `<div class="bubble ai">Error</div>`;
-  }
+  chat.innerHTML += `<div class="bubble ai">${data.reply}</div>`;
 }
 </script>
 
 </body>
-</html>
+      </html>
