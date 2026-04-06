@@ -2,19 +2,14 @@
 <html>
 <head>
   <title>Mini Chai</title>
-
-  <!-- MOBILE FIT (CRITICAL) -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     html, body {
       margin: 0;
       padding: 0;
-      width: 100%;
       height: 100%;
       overflow: hidden;
       font-family: Arial;
@@ -22,15 +17,13 @@
       color: white;
     }
 
-    /* MAIN APP */
     #container {
       display: flex;
       width: 400vw;
-      height: 100dvh; /* modern mobile fix */
+      height: 100dvh;
       transition: transform 0.3s ease;
     }
 
-    /* EACH PAGE */
     .page {
       width: 100vw;
       height: 100dvh;
@@ -38,9 +31,7 @@
       overflow-y: auto;
     }
 
-    h2 {
-      text-align: center;
-    }
+    h2 { text-align: center; }
 
     .item {
       background: #2a2a2a;
@@ -72,7 +63,6 @@
       align-self: flex-start;
     }
 
-    /* TOP NAV */
     #nav {
       position: fixed;
       top: 0;
@@ -84,7 +74,6 @@
       z-index: 1000;
     }
 
-    /* INPUT BAR */
     #inputArea {
       position: fixed;
       bottom: 0;
@@ -109,12 +98,31 @@
       background: #4CAF50;
       color: white;
     }
+
+    /* CHAT TABS */
+    #chatTabs {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding: 10px 0;
+    }
+
+    .tab {
+      background: #2a2a2a;
+      padding: 8px 14px;
+      border-radius: 20px;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .activeTab {
+      background: #4CAF50;
+    }
   </style>
 </head>
 
 <body>
 
-<!-- NAV -->
 <div id="nav">
   <div onclick="goToPage(0)">Characters</div>
   <div onclick="goToPage(1)">Search</div>
@@ -122,15 +130,14 @@
   <div onclick="goToPage(3)">Profile</div>
 </div>
 
-<!-- PAGES -->
 <div id="container">
 
   <!-- Characters -->
   <div class="page">
     <h2>Characters</h2>
-    <div class="item" onclick="setCharacter('friend')">Best Friend</div>
-    <div class="item" onclick="setCharacter('mentor')">Mentor</div>
-    <div class="item" onclick="setCharacter('villain')">Villain</div>
+    <div class="item" onclick="setCharacter('Kyle')">Kyle</div>
+    <div class="item" onclick="setCharacter('Best Friend')">Best Friend</div>
+    <div class="item" onclick="setCharacter('Maya')">Maya</div>
   </div>
 
   <!-- Search -->
@@ -138,15 +145,20 @@
     <h2>Search</h2>
     <input id="search" placeholder="Search..." oninput="filterCharacters()" />
     <div id="characterList">
-      <div class="item" onclick="setCharacter('friend')">Funny Friend</div>
-      <div class="item" onclick="setCharacter('mentor')">Wise Mentor</div>
-      <div class="item" onclick="setCharacter('villain')">Dark Villain</div>
+      <div class="item" onclick="setCharacter('Kyle')">Kyle</div>
+      <div class="item" onclick="setCharacter('Best Friend')">Best Friend</div>
+      <div class="item" onclick="setCharacter('Maya')">Maya</div>
     </div>
   </div>
 
   <!-- Chat -->
   <div class="page">
     <h2>Chat</h2>
+
+    <!-- horizontal chats -->
+    <div id="chatTabs"></div>
+
+    <!-- messages -->
     <div id="chat" class="chat"></div>
   </div>
 
@@ -158,7 +170,6 @@
 
 </div>
 
-<!-- INPUT -->
 <div id="inputArea">
   <input id="input" placeholder="Type a message..." />
   <button onclick="sendMessage()">Send</button>
@@ -167,9 +178,9 @@
 <script>
 let currentPage = 0;
 let totalPages = 4;
-let currentCharacter = "friend";
+let currentCharacter = "Kyle";
 
-/* LOAD SAVED CHATS */
+/* STORAGE */
 let chats = JSON.parse(localStorage.getItem("miniChaiChats")) || {};
 
 /* NAV */
@@ -198,11 +209,36 @@ document.addEventListener("touchend", e => {
   else goToPage(currentPage - 1);
 });
 
-/* SWITCH CHARACTER */
+/* SELECT CHARACTER */
 function setCharacter(char) {
   currentCharacter = char;
+
+  if (!chats[char]) chats[char] = [];
+
+  renderTabs();
   loadChat();
+
   goToPage(2);
+}
+
+/* RENDER TABS */
+function renderTabs() {
+  const tabs = document.getElementById("chatTabs");
+  tabs.innerHTML = "";
+
+  Object.keys(chats).forEach(char => {
+    const div = document.createElement("div");
+    div.className = "tab" + (char === currentCharacter ? " activeTab" : "");
+    div.innerText = char;
+
+    div.onclick = () => {
+      currentCharacter = char;
+      renderTabs();
+      loadChat();
+    };
+
+    tabs.appendChild(div);
+  });
 }
 
 /* LOAD CHAT */
@@ -217,7 +253,7 @@ function loadChat() {
   });
 }
 
-/* SAVE CHAT */
+/* SAVE */
 function saveChat() {
   localStorage.setItem("miniChaiChats", JSON.stringify(chats));
 }
@@ -234,7 +270,7 @@ function filterCharacters() {
   });
 }
 
-/* CHAT SEND */
+/* SEND */
 async function sendMessage() {
   const input = document.getElementById("input");
   const chat = document.getElementById("chat");
@@ -242,19 +278,16 @@ async function sendMessage() {
   const msg = input.value.trim();
   if (!msg) return;
 
-  // create character chat if not exist
-  if (!chats[currentCharacter]) {
-    chats[currentCharacter] = [];
-  }
+  if (!chats[currentCharacter]) chats[currentCharacter] = [];
 
-  // USER MESSAGE
   chats[currentCharacter].push({ role: "user", text: msg });
+
   chat.innerHTML += `<div class="bubble user">${msg}</div>`;
   input.value = "";
 
-  // TYPING
   const id = "t" + Date.now();
   chat.innerHTML += `<div id="${id}" class="bubble ai">Typing...</div>`;
+
   try {
     const res = await fetch("https://mini-chai-backend.onrender.com/chat", {
       method: "POST",
@@ -266,12 +299,12 @@ async function sendMessage() {
 
     document.getElementById(id).remove();
 
-    // AI MESSAGE
     chats[currentCharacter].push({ role: "ai", text: data.reply });
 
     chat.innerHTML += `<div class="bubble ai">${data.reply}</div>`;
 
     saveChat();
+    renderTabs();
 
   } catch {
     document.getElementById(id).remove();
@@ -279,11 +312,12 @@ async function sendMessage() {
   }
 }
 
-/* LOAD FIRST CHAT ON START */
+/* INIT */
 window.onload = () => {
+  renderTabs();
   loadChat();
 };
 </script>
 
 </body>
-        </html>
+  </html>
