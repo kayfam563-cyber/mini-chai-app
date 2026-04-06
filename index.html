@@ -159,48 +159,40 @@
 <script>
 let currentPage = 0;
 let totalPages = 4;
-let isSwiping = false;
 let currentCharacter = "friend";
 
-/* NAVIGATION */
+/* HARD LOCK NAVIGATION */
 function goToPage(i) {
   if (i < 0 || i >= totalPages) return;
 
   currentPage = i;
-  isSwiping = true;
 
   document.getElementById("container").style.transform =
     "translateX(-" + (i * 100) + "vw)";
-
-  setTimeout(() => {
-    isSwiping = false;
-  }, 300);
 }
 
-/* SWIPE SNAP */
+/* CONTROLLED SWIPE (NO DRAGGING) */
 let startX = 0;
 
 document.addEventListener("touchstart", e => {
-  if (isSwiping) return;
   startX = e.touches[0].clientX;
 });
 
 document.addEventListener("touchend", e => {
-  if (isSwiping) return;
-
   let endX = e.changedTouches[0].clientX;
   let diff = startX - endX;
 
-  if (diff > 60) {
-    goToPage(currentPage + 1);
-  }
+  // Only trigger if strong swipe
+  if (Math.abs(diff) < 120) return;
 
-  if (diff < -60) {
-    goToPage(currentPage - 1);
+  if (diff > 0) {
+    goToPage(currentPage + 1); // swipe left
+  } else {
+    goToPage(currentPage - 1); // swipe right
   }
 });
 
-/* CHARACTER SELECT */
+/* CHARACTER */
 function setCharacter(char) {
   currentCharacter = char;
   goToPage(2);
@@ -217,7 +209,6 @@ function filterCharacters() {
       : "none";
   });
 }
-
 /* CHAT */
 async function sendMessage() {
   const input = document.getElementById("input");
