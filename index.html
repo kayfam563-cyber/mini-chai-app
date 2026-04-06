@@ -169,17 +169,19 @@ let currentPage = 0;
 let totalPages = 4;
 let currentCharacter = "friend";
 
-/* NAVIGATION (LOCKED) */
+/* LOAD SAVED CHATS */
+let chats = JSON.parse(localStorage.getItem("miniChaiChats")) || {};
+
+/* NAV */
 function goToPage(i) {
   if (i < 0 || i >= totalPages) return;
-
   currentPage = i;
 
   document.getElementById("container").style.transform =
     "translateX(-" + (i * 100) + "vw)";
 }
 
-/* CONTROLLED SWIPE (NO DRAG) */
+/* SWIPE */
 let startX = 0;
 
 document.addEventListener("touchstart", e => {
@@ -192,17 +194,32 @@ document.addEventListener("touchend", e => {
 
   if (Math.abs(diff) < 80) return;
 
-  if (diff > 0) {
-    goToPage(currentPage + 1);
-  } else {
-    goToPage(currentPage - 1);
-  }
+  if (diff > 0) goToPage(currentPage + 1);
+  else goToPage(currentPage - 1);
 });
 
-/* CHARACTER */
+/* SWITCH CHARACTER */
 function setCharacter(char) {
   currentCharacter = char;
+  loadChat();
   goToPage(2);
+}
+
+/* LOAD CHAT */
+function loadChat() {
+  const chatDiv = document.getElementById("chat");
+  chatDiv.innerHTML = "";
+
+  const messages = chats[currentCharacter] || [];
+
+  messages.forEach(msg => {
+    chatDiv.innerHTML += `<div class="bubble ${msg.role}">${msg.text}</div>`;
+  });
+}
+
+/* SAVE CHAT */
+function saveChat() {
+  localStorage.setItem("miniChaiChats", JSON.stringify(chats));
 }
 
 /* SEARCH */
@@ -217,7 +234,7 @@ function filterCharacters() {
   });
 }
 
-/* CHAT */
+/* CHAT SEND */
 async function sendMessage() {
   const input = document.getElementById("input");
   const chat = document.getElementById("chat");
@@ -225,12 +242,19 @@ async function sendMessage() {
   const msg = input.value.trim();
   if (!msg) return;
 
+  // create character chat if not exist
+  if (!chats[currentCharacter]) {
+    chats[currentCharacter] = [];
+  }
+
+  // USER MESSAGE
+  chats[currentCharacter].push({ role: "user", text: msg });
   chat.innerHTML += `<div class="bubble user">${msg}</div>`;
   input.value = "";
 
+  // TYPING
   const id = "t" + Date.now();
   chat.innerHTML += `<div id="${id}" class="bubble ai">Typing...</div>`;
-
   try {
     const res = await fetch("https://mini-chai-backend.onrender.com/chat", {
       method: "POST",
@@ -241,13 +265,24 @@ async function sendMessage() {
     const data = await res.json();
 
     document.getElementById(id).remove();
+
+    // AI MESSAGE
+    chats[currentCharacter].push({ role: "ai", text: data.reply });
+
     chat.innerHTML += `<div class="bubble ai">${data.reply}</div>`;
+
+    saveChat();
 
   } catch {
     document.getElementById(id).remove();
     chat.innerHTML += `<div class="bubble ai">Error</div>`;
   }
 }
+
+/* LOAD FIRST CHAT ON START */
+window.onload = () => {
+  loadChat();
+};
 </script>
 
 </body>
