@@ -4,12 +4,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body {
+
+/* 🔒 LOCK SCREEN COMPLETELY */
+html, body {
   margin: 0;
+  padding: 0;
+  overflow: hidden;
+  touch-action: none;
+  height: 100%;
   font-family: Arial;
   background: #000;
   color: white;
-  overflow: hidden;
 }
 
 /* TOP NAV */
@@ -21,13 +26,16 @@ body {
   font-weight: bold;
 }
 
-/* PAGES */
+/* 🔒 CONTAINER */
 #container {
   display: flex;
   width: 400vw;
-  transition: 0.3s;
+  height: 100vh;
+  transform: translateX(0);
+  transition: transform 0.3s ease;
 }
 
+/* 🔒 PAGES */
 .page {
   width: 100vw;
   height: 100vh;
@@ -101,6 +109,7 @@ body {
 .ai {
   background: #333;
 }
+
 </style>
 </head>
 
@@ -128,7 +137,7 @@ body {
   <!-- SEARCH -->
   <div class="page">
     <input id="search" placeholder="Search characters..." oninput="filterCharacters()" />
-    <div id="characterList">
+    <div>
       <div class="item">Kyle</div>
       <div class="item">Best Friend</div>
       <div class="item">Maya</div>
@@ -159,45 +168,31 @@ let currentPage = 0;
 const totalPages = 4;
 let currentCharacter = "friend";
 
-/* LOCKED NAVIGATION */
+/* NAVIGATION */
 function goToPage(i) {
   if (i < 0 || i >= totalPages) return;
 
   currentPage = i;
 
   const container = document.getElementById("container");
-  container.style.transition = "transform 0.3s ease";
   container.style.transform = `translateX(-${i * 100}vw)`;
 
-  // show input ONLY in chat page
   const chatInput = document.getElementById("chatInput");
   chatInput.style.display = (i === 2) ? "flex" : "none";
 }
 
-/* CONTROLLED SWIPE */
+/* 🔒 CLEAN SWIPE (NO DRAGGING) */
 let startX = 0;
-let isSwiping = false;
 
 document.addEventListener("touchstart", e => {
   startX = e.touches[0].clientX;
-  isSwiping = true;
 });
 
-document.addEventListener("touchmove", e => {
-  if (!isSwiping) return;
-
-  // STOP dragging movement (this is the key fix)
-  e.preventDefault();
-}, { passive: false });
-
 document.addEventListener("touchend", e => {
-  if (!isSwiping) return;
-  isSwiping = false;
-
   let endX = e.changedTouches[0].clientX;
   let diff = startX - endX;
 
-  if (Math.abs(diff) < 80) return;
+  if (Math.abs(diff) < 100) return;
 
   if (diff > 0) goToPage(currentPage + 1);
   else goToPage(currentPage - 1);
@@ -249,7 +244,7 @@ async function sendMessage() {
     const data = await res.json();
 
     document.getElementById(id).remove();
-    chat.innerHTML += `<div class="bubble ai">${data.reply}</div>;
+    chat.innerHTML += `<div class="bubble ai">${data.reply}</div>`;
 
   } catch {
     document.getElementById(id).remove();
