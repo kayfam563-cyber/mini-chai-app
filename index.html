@@ -155,22 +155,52 @@ body {
 
 <script>
 let currentPage = 0;
-let totalPages = 4;
+const totalPages = 4;
 let currentCharacter = "friend";
 
-/* NAV */
+/* LOCKED NAVIGATION */
 function goToPage(i) {
   if (i < 0 || i >= totalPages) return;
 
   currentPage = i;
 
-  document.getElementById("container").style.transform =
-    "translateX(-" + (i * 100) + "vw)";
+  const container = document.getElementById("container");
+  container.style.transition = "transform 0.3s ease";
+  container.style.transform = `translateX(-${i * 100}vw)`;
 
   // show input ONLY in chat page
   const chatInput = document.getElementById("chatInput");
   chatInput.style.display = (i === 2) ? "flex" : "none";
 }
+
+/* CONTROLLED SWIPE */
+let startX = 0;
+let isSwiping = false;
+
+document.addEventListener("touchstart", e => {
+  startX = e.touches[0].clientX;
+  isSwiping = true;
+});
+
+document.addEventListener("touchmove", e => {
+  if (!isSwiping) return;
+
+  // STOP dragging movement (this is the key fix)
+  e.preventDefault();
+}, { passive: false });
+
+document.addEventListener("touchend", e => {
+  if (!isSwiping) return;
+  isSwiping = false;
+
+  let endX = e.changedTouches[0].clientX;
+  let diff = startX - endX;
+
+  if (Math.abs(diff) < 80) return;
+
+  if (diff > 0) goToPage(currentPage + 1);
+  else goToPage(currentPage - 1);
+});
 
 /* CHARACTER */
 function setCharacter(char) {
@@ -218,7 +248,7 @@ async function sendMessage() {
     const data = await res.json();
 
     document.getElementById(id).remove();
-    chat.innerHTML += `<div class="bubble ai">${data.reply}</div>`;
+    chat.innerHTML += `<div class="bubble ai">${data.reply}</div>;
 
   } catch {
     document.getElementById(id).remove();
