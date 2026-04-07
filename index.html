@@ -123,7 +123,7 @@
 
 <body>
 
-<div id="nav">
+<div id="navbar">
   <div onclick="goToPage(0)">Characters</div>
   <div onclick="goToPage(1)">Search</div>
   <div onclick="goToPage(2)">Chat</div>
@@ -132,40 +132,45 @@
 
 <div id="container">
 
-  <!-- Characters -->
+  <!-- CHARACTERS -->
   <div class="page">
     <h2>Characters</h2>
-    <div class="item" onclick="setCharacter('Kyle')">Kyle</div>
-    <div class="item" onclick="setCharacter('Best Friend')">Best Friend</div>
-    <div class="item" onclick="setCharacter('Maya')">Maya</div>
-  </div>
-
-  <!-- Search -->
-  <div class="page">
-    <h2>Search</h2>
-    <input id="search" placeholder="Search..." oninput="filterCharacters()" />
     <div id="characterList">
-      <div class="item" onclick="setCharacter('Kyle')">Kyle</div>
-      <div class="item" onclick="setCharacter('Best Friend')">Best Friend</div>
-      <div class="item" onclick="setCharacter('Maya')">Maya</div>
+      <div class="item" onclick="setCharacter('kyle')">Kyle</div>
+      <div class="item" onclick="setCharacter('friend')">Best Friend</div>
+      <div class="item" onclick="setCharacter('maya')">Maya</div>
     </div>
   </div>
 
-  <!-- Chat -->
+  <!-- SEARCH -->
   <div class="page">
-    <h2>Chat</h2>
-
-    <!-- horizontal chats -->
-    <div id="chatTabs"></div>
-
-    <!-- messages -->
-    <div id="chat" class="chat"></div>
+    <input id="search" placeholder="Search characters..." oninput="filterCharacters()" />
+    <div id="characterList">
+      <div class="item">Kyle</div>
+      <div class="item">Best Friend</div>
+      <div class="item">Maya</div>
+    </div>
   </div>
 
-  <!-- Profile -->
+  <!-- CHAT -->
+  <div class="page">
+    <h2>Chat</h2>
+    <div id="chat"></div>
+
+    <!-- ONLY CHAT HAS INPUT -->
+    <div id="chatInput">
+      <input id="input" placeholder="Type a message..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <!-- PROFILE -->
   <div class="page">
     <h2>Profile</h2>
-    <div class="item">Account</div>
+    <p>User settings coming soon...</p>
+  </div>
+
+</div>
   </div>
 
 </div>
