@@ -1,124 +1,106 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Mini Chai</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    * { box-sizing: border-box; }
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: #000;
+  color: white;
+  overflow: hidden;
+}
 
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      overflow: hidden;
-      font-family: Arial;
-      background: #0f0f0f;
-      color: white;
-    }
+/* TOP NAV */
+#navbar {
+  display: flex;
+  justify-content: space-around;
+  background: #111;
+  padding: 15px 0;
+  font-weight: bold;
+}
 
-    #container {
-      display: flex;
-      width: 400vw;
-      height: 100dvh;
-      transition: transform 0.3s ease;
-    }
+/* PAGES */
+#container {
+  display: flex;
+  width: 400vw;
+  transition: 0.3s;
+}
 
-    .page {
-      width: 100vw;
-      height: 100dvh;
-      padding: 60px 10px 80px;
-      overflow-y: auto;
-    }
+.page {
+  width: 100vw;
+  height: calc(100vh - 60px);
+  padding: 20px;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
 
-    h2 { text-align: center; }
+/* ITEMS */
+.item {
+  background: #222;
+  padding: 15px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+}
 
-    .item {
-      background: #2a2a2a;
-      padding: 12px;
-      margin: 8px 0;
-      border-radius: 12px;
-      cursor: pointer;
-    }
+/* CHAT */
+#chat {
+  margin-bottom: 80px;
+}
 
-    .chat {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
+/* CHAT INPUT */
+#chatInput {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  display: none;
+  background: #111;
+  padding: 10px;
+}
 
-    .bubble {
-      padding: 10px;
-      border-radius: 15px;
-      max-width: 75%;
-    }
+#chatInput input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 20px;
+  border: none;
+}
 
-    .user {
-      background: #4CAF50;
-      align-self: flex-end;
-    }
+#chatInput button {
+  margin-left: 10px;
+  padding: 10px 15px;
+  border-radius: 20px;
+  border: none;
+  background: green;
+  color: white;
+}
 
-    .ai {
-      background: #2a2a2a;
-      align-self: flex-start;
-    }
+/* SEARCH */
+#search {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border-radius: 10px;
+  border: none;
+}
 
-    #nav {
-      position: fixed;
-      top: 0;
-      width: 100%;
-      display: flex;
-      justify-content: space-around;
-      background: #1a1a1a;
-      padding: 10px;
-      z-index: 1000;
-    }
+/* CHAT BUBBLES */
+.bubble {
+  padding: 10px;
+  border-radius: 15px;
+  margin: 10px 0;
+  max-width: 70%;
+}
 
-    #inputArea {
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      display: flex;
-      padding: 10px;
-      background: #1a1a1a;
-    }
+.user {
+  background: green;
+  margin-left: auto;
+}
 
-    input {
-      flex: 1;
-      padding: 10px;
-      border-radius: 20px;
-      border: none;
-    }
-
-    button {
-      margin-left: 10px;
-      padding: 10px;
-      border-radius: 20px;
-      border: none;
-      background: #4CAF50;
-      color: white;
-    }
-
-    /* CHAT TABS */
-    #chatTabs {
-      display: flex;
-      gap: 10px;
-      overflow-x: auto;
-      padding: 10px 0;
-    }
-
-    .tab {
-      background: #2a2a2a;
-      padding: 8px 14px;
-      border-radius: 20px;
-      white-space: nowrap;
-      cursor: pointer;
-    }
-
-    .activeTab {
-      background: #4CAF50;
-    }
-  </style>
+.ai {
+  background: #333;
+}
+</style>
 </head>
 
 <body>
@@ -157,7 +139,6 @@
     <h2>Chat</h2>
     <div id="chat"></div>
 
-    <!-- ONLY CHAT HAS INPUT -->
     <div id="chatInput">
       <input id="input" placeholder="Type a message..." />
       <button onclick="sendMessage()">Send</button>
@@ -167,17 +148,9 @@
   <!-- PROFILE -->
   <div class="page">
     <h2>Profile</h2>
-    <p>User settings coming soon...</p>
+    <p>Coming soon...</p>
   </div>
 
-</div>
-  </div>
-
-</div>
-
-<div id="inputArea">
-  <input id="input" placeholder="Type a message..." />
-  <button onclick="sendMessage()">Send</button>
 </div>
 
 <script>
@@ -188,41 +161,28 @@ let currentCharacter = "friend";
 /* NAV */
 function goToPage(i) {
   if (i < 0 || i >= totalPages) return;
+
   currentPage = i;
 
   document.getElementById("container").style.transform =
     "translateX(-" + (i * 100) + "vw)";
+
+  // show input ONLY in chat page
+  const chatInput = document.getElementById("chatInput");
+  chatInput.style.display = (i === 2) ? "flex" : "none";
 }
-
-/* SWIPE */
-let startX = 0;
-
-document.addEventListener("touchstart", e => {
-  startX = e.touches[0].clientX;
-});
-
-document.addEventListener("touchend", e => {
-  let endX = e.changedTouches[0].clientX;
-  let diff = startX - endX;
-
-  if (Math.abs(diff) < 80) return;
-
-  if (diff > 0) goToPage(currentPage + 1);
-  else goToPage(currentPage - 1);
-});
 
 /* CHARACTER */
 function setCharacter(char) {
   currentCharacter = char;
   goToPage(2);
-
   document.getElementById("chat").innerHTML = "";
 }
 
 /* SEARCH */
 function filterCharacters() {
   const search = document.getElementById("search").value.toLowerCase();
-  const items = document.querySelectorAll("#characterList .item");
+  const items = document.querySelectorAll(".item");
 
   items.forEach(item => {
     item.style.display = item.textContent.toLowerCase().includes(search)
@@ -258,7 +218,6 @@ async function sendMessage() {
     const data = await res.json();
 
     document.getElementById(id).remove();
-
     chat.innerHTML += `<div class="bubble ai">${data.reply}</div>`;
 
   } catch {
@@ -266,7 +225,7 @@ async function sendMessage() {
     chat.innerHTML += `<div class="bubble ai">Error</div>`;
   }
 }
-  </script>
-  
+</script>
+
 </body>
-  </html>
+</html>
