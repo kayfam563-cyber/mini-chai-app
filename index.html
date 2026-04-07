@@ -178,10 +178,7 @@
 <script>
 let currentPage = 0;
 let totalPages = 4;
-let currentCharacter = "Kyle";
-
-/* STORAGE */
-let chats = JSON.parse(localStorage.getItem("miniChaiChats")) || {};
+let currentCharacter = "friend";
 
 /* NAV */
 function goToPage(i) {
@@ -209,53 +206,12 @@ document.addEventListener("touchend", e => {
   else goToPage(currentPage - 1);
 });
 
-/* SELECT CHARACTER */
+/* CHARACTER */
 function setCharacter(char) {
   currentCharacter = char;
-
-  if (!chats[char]) chats[char] = [];
-
-  renderTabs();
-  loadChat();
-
   goToPage(2);
-}
 
-/* RENDER TABS */
-function renderTabs() {
-  const tabs = document.getElementById("chatTabs");
-  tabs.innerHTML = "";
-
-  Object.keys(chats).forEach(char => {
-    const div = document.createElement("div");
-    div.className = "tab" + (char === currentCharacter ? " activeTab" : "");
-    div.innerText = char;
-
-    div.onclick = () => {
-      currentCharacter = char;
-      renderTabs();
-      loadChat();
-    };
-
-    tabs.appendChild(div);
-  });
-}
-
-/* LOAD CHAT */
-function loadChat() {
-  const chatDiv = document.getElementById("chat");
-  chatDiv.innerHTML = "";
-
-  const messages = chats[currentCharacter] || [];
-
-  messages.forEach(msg => {
-    chatDiv.innerHTML += `<div class="bubble ${msg.role}">${msg.text}</div>`;
-  });
-}
-
-/* SAVE */
-function saveChat() {
-  localStorage.setItem("miniChaiChats", JSON.stringify(chats));
+  document.getElementById("chat").innerHTML = "";
 }
 
 /* SEARCH */
@@ -270,17 +226,13 @@ function filterCharacters() {
   });
 }
 
-/* SEND */
+/* SEND MESSAGE */
 async function sendMessage() {
   const input = document.getElementById("input");
   const chat = document.getElementById("chat");
 
   const msg = input.value.trim();
   if (!msg) return;
-
-  if (!chats[currentCharacter]) chats[currentCharacter] = [];
-
-  chats[currentCharacter].push({ role: "user", text: msg });
 
   chat.innerHTML += `<div class="bubble user">${msg}</div>`;
   input.value = "";
@@ -292,32 +244,24 @@ async function sendMessage() {
     const res = await fetch("https://mini-chai-backend.onrender.com/chat", {
       method: "POST",
       headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({message: msg, character: currentCharacter})
+      body: JSON.stringify({
+        message: msg,
+        character: currentCharacter
+      })
     });
 
     const data = await res.json();
 
     document.getElementById(id).remove();
 
-    chats[currentCharacter].push({ role: "ai", text: data.reply });
-
     chat.innerHTML += `<div class="bubble ai">${data.reply}</div>`;
-
-    saveChat();
-    renderTabs();
 
   } catch {
     document.getElementById(id).remove();
     chat.innerHTML += `<div class="bubble ai">Error</div>`;
   }
 }
-
-/* INIT */
-window.onload = () => {
-  renderTabs();
-  loadChat();
-};
-</script>
-
+  </script>
+  
 </body>
   </html>
