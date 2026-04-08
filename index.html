@@ -158,8 +158,8 @@ html, body {
     <h2>Characters</h2>
     <div>
       <div class="item" onclick="setCharacter('kyle')">Kyle</div>
-      <div class="item" onclick="setCharacter('friend')">Best Friend</div>
-      <div class="item" onclick="setCharacter('maya')">Maya</div>
+<div class="item" onclick="setCharacter('friend')">Best Friend</div>
+<div class="item" onclick="setCharacter('maya')">Maya</div>
     </div>
   </div>
 
@@ -205,6 +205,13 @@ let currentPage = 0;
 const totalPages = 4;
 let currentCharacter = null;
 
+/* 🧠 MEMORY SYSTEM */
+let chats = {
+  kyle: [],
+  friend: [],
+  maya: []
+};
+
 /* NAVIGATION */
 function goToPage(i) {
   if (i < 0 || i >= totalPages) return;
@@ -212,23 +219,94 @@ function goToPage(i) {
   currentPage = i;
 
   document.getElementById("container").style.transform =
-    `translateX(-${i * 100}vw)`;
+    "translateX(-" + (i * 100) + "vw)";
 
-  // TITLE
-  const titles = ["Characters", "Search", "Chat", "Profile"];
-  document.getElementById("headerTitle").innerText = titles[i];
-
-  // HIDE CHAT INPUT ALWAYS
-  document.getElementById("chatInput").style.display = "none";
-
-  // ACTIVE NAV
-  for (let x = 0; x < 4; x++) {
-    document.getElementById("nav" + x).classList.remove("activeNav");
-  }
-  document.getElementById("nav" + i).classList.add("activeNav");
+  // Hide input unless inside a chat
+  document.getElementById("chatInput").style.display =
+    (i === 2 && currentCharacter) ? "flex" : "none";
 }
 
-/* SWIPE */
+/* SELECT CHARACTER */
+function setCharacter(char) {
+  currentCharacter = char;
+
+  goToPage(2);
+
+  loadChat();
+}
+
+/* LOAD CHAT */
+function loadChat() {
+  const chatBox = document.getElementById("chat");
+  chatBox.innerHTML = "";
+
+  const messages = chats[currentCharacter];
+
+  messages.forEach(msg => {
+    chatBox.innerHTML += `
+      <div class="bubble ${msg.role}">
+        ${msg.text}
+      </div>
+    `;
+  });
+}
+
+/* SEND MESSAGE */
+async function sendMessage() {
+  const input = document.getElementById("input");
+  const msg = input.value.trim();
+  if (!msg || !currentCharacter) return;
+
+  const chatBox = document.getElementById("chat");
+
+  // SAVE USER MESSAGE
+  chats[currentCharacter].push({ role: "user", text: msg });
+
+  chatBox.innerHTML += `<div class="bubble user">${msg}</div>`;
+  input.value = "";
+
+  // TYPING
+  const id = "t" + Date.now();
+  chatBox.innerHTML += `<div id="${id}" class="bubble ai">Typing...</div>`;
+
+  try {
+    const res = await fetch("https://mini-chai-backend.onrender.com/chat", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({
+        message: msg,
+        character: currentCharacter
+      })
+    });
+
+    const data = await res.json();
+
+    document.getElementById(id).remove();
+
+    // SAVE AI MESSAGE
+    chats[currentCharacter].push({ role: "ai", text: data.reply });
+
+    chatBox.innerHTML += `<div class="bubble ai">${data.reply}</div>`;
+
+  } catch {
+    document.getElementById(id).remove();
+    chatBox.innerHTML += `<div class="bubble ai">Error</div>`;
+  }
+}
+
+/* SEARCH */
+function filterCharacters() {
+  const search = document.getElementById("search").value.toLowerCase();
+  const items = document.querySelectorAll(".item");
+
+  items.forEach(item => {
+    item.style.display = item.textContent.toLowerCase().includes(search)
+      ? "block"
+      : "none";
+  });
+}
+
+/* SWIPE (CONTROLLED) */
 let startX = 0;
 
 document.addEventListener("touchstart", e => {
@@ -244,68 +322,6 @@ document.addEventListener("touchend", e => {
   if (diff > 0) goToPage(currentPage + 1);
   else goToPage(currentPage - 1);
 });
-
-/* CHARACTER SELECT */
-function setCharacter(char) {
-  currentCharacter = char;
-
-  goToPage(2);
-
-  // SHOW INPUT ONLY HERE
-  document.getElementById("chatInput").style.display = "flex";
-
-  document.getElementById("chat").innerHTML = "";
-}
-
-/* SEARCH */
-function filterCharacters() {
-  const search = document.getElementById("search").value.toLowerCase();
-  const items = document.querySelectorAll(".item");
-
-  items.forEach(item => {
-    item.style.display = item.textContent.toLowerCase().includes(search)
-      ? "block"
-      : "none";
-  });
-}
-
-/* SEND MESSAGE */
-async function sendMessage() {
-  const input = document.getElementById("input");
-  const chat = document.getElementById("chat");
-
-  const msg = input.value.trim();
-  if (!msg) return;
-
-  chat.innerHTML += `<div class="bubble user">${msg}</div>`;
-  input.value = "";
-
-  const id = "t" + Date.now();
-  chat.innerHTML += `<div id="${id}" class="bubble ai">Typing...</div>`;
-
-  try {
-    const res = await fetch("https://mini-chai-backend.onrender.com/chat", {
-      method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({
-        message: msg,
-        character: currentCharacter
-      })
-    });
-
-    const data = await res.json();
-
-    document.getElementById(id).remove();
-    chat.innerHTML += `<div class="bubble ai">${data.reply}</div>`;
-
-  } catch {
-    document.getElementById(id).remove();
-    chat.innerHTML += `<div class="bubble ai">Error</div>`;
-  }
-}
-
-/* INIT */
-goToPage(0);
 </script>
 
 </body>
