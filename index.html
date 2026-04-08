@@ -4,53 +4,38 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-
-/* 🔒 LOCK SCREEN */
 html, body {
   margin: 0;
   padding: 0;
   overflow: hidden;
-  touch-action: none;
   height: 100%;
-  font-family: Arial;
-  background: #000;
+  background: black;
   color: white;
+  font-family: Arial;
 }
 
-/* 🔝 HEADER TITLE */
-#headerTitle {
-  position: fixed;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  text-align: center;
-  font-size: 20px;
-  padding: 15px 0;
-  background: #111;
-  font-weight: bold;
-  z-index: 1000;
-}
-
-/* 🔒 CONTAINER */
+/* CONTAINER */
 #container {
   display: flex;
   width: 400vw;
   height: 100vh;
-  transform: translateX(0);
   transition: transform 0.3s ease;
 }
 
-/* 🔒 PAGES */
 .page {
   width: 100vw;
   height: 100vh;
   flex-shrink: 0;
   padding: 20px;
-  padding-top: 70px;
-  padding-bottom: 80px;
   box-sizing: border-box;
   overflow-y: auto;
+}
+
+/* TOP TITLE */
+.title {
+  text-align: center;
+  font-size: 22px;
+  margin-bottom: 20px;
 }
 
 /* ITEMS */
@@ -75,10 +60,26 @@ html, body {
   margin-bottom: 80px;
 }
 
-/* CHAT INPUT */
+.bubble {
+  padding: 10px;
+  border-radius: 15px;
+  margin: 10px 0;
+  max-width: 70%;
+}
+
+.user {
+  background: green;
+  margin-left: auto;
+}
+
+.ai {
+  background: #333;
+}
+
+/* INPUT */
 #chatInput {
   position: fixed;
-  bottom: 60px;
+  bottom: 0;
   width: 100%;
   display: none;
   background: #111;
@@ -101,116 +102,84 @@ html, body {
   color: white;
 }
 
-/* CHAT BUBBLES */
-.bubble {
-  padding: 10px;
-  border-radius: 15px;
-  margin: 10px 0;
-  max-width: 70%;
-}
-
-.user {
-  background: green;
-  margin-left: auto;
-}
-
-.ai {
-  background: #333;
-}
-
-/* 🔻 BOTTOM NAV */
+/* BOTTOM NAV */
 #bottomNav {
   position: fixed;
   bottom: 0;
-  left: 0;
   width: 100%;
   background: #111;
   display: flex;
   justify-content: space-around;
-  padding: 12px 0;
-  z-index: 1000;
+  padding: 10px 0;
 }
 
-#bottomNav div {
-  font-size: 22px;
-  opacity: 0.5;
-  transition: 0.2s;
+.navItem {
+  color: gray;
 }
 
-.activeNav {
-  opacity: 1 !important;
+.navActive {
   color: white;
 }
-
 </style>
 </head>
 
 <body>
 
-<!-- 🔝 TITLE -->
-<div id="headerTitle">Characters</div>
-
-<!-- 📱 PAGES -->
 <div id="container">
 
   <!-- CHARACTERS -->
   <div class="page">
-    <h2>Characters</h2>
-    <div>
-      <div class="item" onclick="setCharacter('kyle')">Kyle</div>
-<div class="item" onclick="setCharacter('friend')">Best Friend</div>
-<div class="item" onclick="setCharacter('maya')">Maya</div>
-    </div>
+    <div class="title">Characters</div>
+
+    <div class="item" onclick="setCharacter('kyle')">Kyle</div>
+    <div class="item" onclick="setCharacter('friend')">Best Friend</div>
+    <div class="item" onclick="setCharacter('maya')">Maya</div>
   </div>
 
   <!-- SEARCH -->
   <div class="page">
-    <input id="search" placeholder="Search characters..." oninput="filterCharacters()" />
-    <div>
-      <div class="item">Kyle</div>
-      <div class="item">Best Friend</div>
-      <div class="item">Maya</div>
-    </div>
+    <div class="title">Search</div>
+
+    <input id="search" placeholder="Search..." oninput="filterCharacters()" />
+
+    <div class="item">Kyle</div>
+    <div class="item">Best Friend</div>
+    <div class="item">Maya</div>
   </div>
 
   <!-- CHAT -->
   <div class="page">
-    <h2>Chat</h2>
-    <div id="chat"></div>
+    <div class="title">Chat</div>
 
-    <div id="chatInput">
-      <input id="input" placeholder="Type a message..." />
-      <button onclick="sendMessage()">Send</button>
-    </div>
+    <div id="chat"></div>
   </div>
 
   <!-- PROFILE -->
   <div class="page">
-    <h2>Profile</h2>
+    <div class="title">Profile</div>
     <p>Coming soon...</p>
   </div>
 
 </div>
 
-<!-- 🔻 NAV -->
+<!-- INPUT -->
+<div id="chatInput">
+  <input id="input" placeholder="Type a message..." />
+  <button onclick="sendMessage()">Send</button>
+</div>
+
+<!-- BOTTOM NAV -->
 <div id="bottomNav">
-  <div onclick="goToPage(0)" id="nav0">🏠</div>
-  <div onclick="goToPage(1)" id="nav1">🔍</div>
-  <div onclick="goToPage(2)" id="nav2">💬</div>
-  <div onclick="goToPage(3)" id="nav3">👤</div>
+  <div class="navItem navActive" onclick="goToPage(0)">Home</div>
+  <div class="navItem" onclick="goToPage(1)">Search</div>
+  <div class="navItem" onclick="goToPage(2)">Chat</div>
+  <div class="navItem" onclick="goToPage(3)">Profile</div>
 </div>
 
 <script>
 let currentPage = 0;
 const totalPages = 4;
 let currentCharacter = null;
-
-/* 🧠 MEMORY SYSTEM */
-let chats = {
-  kyle: [],
-  friend: [],
-  maya: []
-};
 
 /* NAVIGATION */
 function goToPage(i) {
@@ -221,53 +190,63 @@ function goToPage(i) {
   document.getElementById("container").style.transform =
     "translateX(-" + (i * 100) + "vw)";
 
-  // Hide input unless inside a chat
   document.getElementById("chatInput").style.display =
     (i === 2 && currentCharacter) ? "flex" : "none";
+
+  document.querySelectorAll(".navItem").forEach((el, index) => {
+    el.classList.toggle("navActive", index === i);
+  });
 }
 
-/* SELECT CHARACTER */
+/* SWIPE */
+let startX = 0;
+
+document.addEventListener("touchstart", e => {
+  startX = e.touches[0].clientX;
+});
+
+document.addEventListener("touchend", e => {
+  let endX = e.changedTouches[0].clientX;
+  let diff = startX - endX;
+
+  if (Math.abs(diff) < 80) return;
+
+  if (diff > 0) goToPage(currentPage + 1);
+  else goToPage(currentPage - 1);
+});
+
+/* CHARACTER SELECT */
 function setCharacter(char) {
   currentCharacter = char;
 
+  document.getElementById("chat").innerHTML = "";
   goToPage(2);
-
-  loadChat();
 }
 
-/* LOAD CHAT */
-function loadChat() {
-  const chatBox = document.getElementById("chat");
-  chatBox.innerHTML = "";
+/* SEARCH */
+function filterCharacters() {
+  const search = document.getElementById("search").value.toLowerCase();
+  const items = document.querySelectorAll(".item");
 
-  const messages = chats[currentCharacter];
-
-  messages.forEach(msg => {
-    chatBox.innerHTML += `
-      <div class="bubble ${msg.role}">
-        ${msg.text}
-      </div>
-    `;
+  items.forEach(item => {
+    item.style.display =
+      item.textContent.toLowerCase().includes(search) ? "block" : "none";
   });
 }
 
 /* SEND MESSAGE */
 async function sendMessage() {
   const input = document.getElementById("input");
+  const chat = document.getElementById("chat");
+
   const msg = input.value.trim();
-  if (!msg || !currentCharacter) return;
+  if (!msg) return;
 
-  const chatBox = document.getElementById("chat");
-
-  // SAVE USER MESSAGE
-  chats[currentCharacter].push({ role: "user", text: msg });
-
-  chatBox.innerHTML += `<div class="bubble user">${msg}</div>`;
+  chat.innerHTML += `<div class="bubble user">${msg}</div>`;
   input.value = "";
 
-  // TYPING
   const id = "t" + Date.now();
-  chatBox.innerHTML += `<div id="${id}" class="bubble ai">Typing...</div>`;
+  chat.innerHTML += `<div id="${id}" class="bubble ai">Typing...</div>`;
 
   try {
     const res = await fetch("https://mini-chai-backend.onrender.com/chat", {
@@ -283,46 +262,14 @@ async function sendMessage() {
 
     document.getElementById(id).remove();
 
-    // SAVE AI MESSAGE
-    chats[currentCharacter].push({ role: "ai", text: data.reply });
+    chat.innerHTML += `<div class="bubble ai">${data.reply}</div>`;
 
-    chatBox.innerHTML += `<div class="bubble ai">${data.reply}</div>`;
-
-  } catch {
+  } catch (err) {
     document.getElementById(id).remove();
-    chatBox.innerHTML += `<div class="bubble ai">Error</div>`;
+    chat.innerHTML += `<div class="bubble ai">Error</div>`;
   }
 }
-
-/* SEARCH */
-function filterCharacters() {
-  const search = document.getElementById("search").value.toLowerCase();
-  const items = document.querySelectorAll(".item");
-
-  items.forEach(item => {
-    item.style.display = item.textContent.toLowerCase().includes(search)
-      ? "block"
-      : "none";
-  });
-}
-
-/* SWIPE (CONTROLLED) */
-let startX = 0;
-
-document.addEventListener("touchstart", e => {
-  startX = e.touches[0].clientX;
-});
-
-document.addEventListener("touchend", e => {
-  let endX = e.changedTouches[0].clientX;
-  let diff = startX - endX;
-
-  if (Math.abs(diff) < 100) return;
-
-  if (diff > 0) goToPage(currentPage + 1);
-  else goToPage(currentPage - 1);
-});
 </script>
 
 </body>
-  </html>
+</html>
